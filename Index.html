@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <?!= include('Styles'); ?>
+  <style>
+    .hero { margin: 6px 0 20px; }
+    .hero h1 { font-size: 28px; margin: 0 0 6px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 640px; }
+
+    .tabs { display: inline-flex; background: #E5EAF4; border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 20px; }
+    .tab { border: 0; background: transparent; padding: 8px 16px; border-radius: 9px; font-weight: 600; cursor: pointer; color: var(--muted); }
+    .tab.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .tab .n { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: var(--red); color: #fff; font-size: 12px; }
+
+    .step { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--sage-ink); margin: 0 0 10px; }
+    .types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+    .choice { position: relative; border: 1.5px solid var(--line); background: #fff; border-radius: var(--radius); padding: 16px; text-align: left; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .1s; }
+    .choice:hover { border-color: var(--c); transform: translateY(-1px); }
+    .choice.on { border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
+    .choice .ico { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 12%, #fff); color: var(--c); margin-bottom: 10px; }
+    .choice b { display: block; font-family: Montserrat, sans-serif; font-size: 15px; }
+    .choice span { font-size: 13px; color: var(--muted); }
+    .choice.on::after { content: "✓"; position: absolute; top: 12px; right: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--c); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+
+    .formcard { padding: 24px; }
+    .formcard h2 { margin: 0 0 4px; font-size: 20px; }
+    .rules { background: var(--mint); border: 1px solid #CCD8F2; border-radius: 12px; padding: 14px 16px; margin: 16px 0 6px; font-size: 14px; }
+    .rules b.t { display: block; font-family: Montserrat, sans-serif; margin-bottom: 6px; color: var(--deep); }
+    .rules ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 16px; margin-top: 20px; }
+    .field { grid-column: span 4; }
+    .field.half { grid-column: span 2; }
+    .field.quarter { grid-column: span 1; }
+    .divider { grid-column: span 4; border-top: 1px solid var(--line); margin: 4px 0 -4px; }
+    .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+    .quick button { border: 1px dashed #AFC0E4; background: transparent; border-radius: 999px; padding: 4px 10px; font-size: 12.5px; cursor: pointer; color: var(--sage-ink); font-weight: 600; }
+    .quick button:hover { background: var(--mint); border-style: solid; }
+    .checkline { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid #CDD6E6; border-radius: 10px; background: #FBFCFE; cursor: pointer; font-size: 14px; }
+    .checkline input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--deep); flex: none; }
+    .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    .editing { background: #FFF7ED; border: 1px solid #FED7AA; color: #9A3412; padding: 10px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 14px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+
+    .done { text-align: center; padding: 44px 24px; }
+    .done .big { width: 64px; height: 64px; border-radius: 50%; background: var(--mint); color: var(--ok); display: grid; place-items: center; margin: 0 auto 14px; }
+    .done h2 { margin: 0 0 6px; }
+    .done .id { font-family: ui-monospace, Menlo, monospace; background: var(--bg); padding: 2px 8px; border-radius: 6px; }
+
+    .mine { display: grid; gap: 12px; }
+    .reqcard { padding: 16px 18px; border-left: 5px solid var(--c); }
+    .reqcard.hl { box-shadow: 0 0 0 3px rgba(63,100,194,.45); }
+    .reqcard .top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .reqcard h3 { margin: 6px 0 2px; font-size: 16px; }
+    .reqcard .note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--bg); font-size: 14px; white-space: pre-wrap; }
+    .reqcard .note b { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+    .reqcard .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 10px; flex-wrap: wrap; }
+
+    @media (max-width: 820px) { .types { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) {
+      .hero h1 { font-size: 23px; }
+      .formcard { padding: 18px 16px; }
+      .grid { grid-template-columns: 1fr 1fr; }
+      .field, .field.half, .divider { grid-column: span 2; }
+      .field.quarter { grid-column: span 1; }
+      .types { gap: 10px; }
+      .choice { padding: 14px 12px; }
+      .actions .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-in">
+      <div class="mark">HQA</div>
+      <div class="brand">Requests<small>HQA Spring · Parties, events, trips &amp; volunteers</small></div>
+      <div class="spacer"></div>
+      <div class="who" id="who"></div>
+    </div>
+  </header>
+  <div class="banner" role="img" aria-label="Houston Quran Academy Spring"></div>
+
+  <main class="wrap narrow" id="app">
+    <div class="loading"><div class="spinner"></div>Loading…</div>
+  </main>
+  <div class="toast" id="toast"></div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ *  Icons
+ * ------------------------------------------------------------------ */
+const SVG = (p) => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+const ICONS = {
+  party: SVG('<path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/>'),
+  event: SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>'),
+  fieldtrip: SVG('<path d="M8 6v6M15 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>'),
+  volunteer: SVG('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'),
+  check: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+};
+
+/* ------------------------------------------------------------------ *
+ *  Form definitions — edit labels/options here
+ * ------------------------------------------------------------------ */
+const LOCATIONS = ['Classroom', 'Cafeteria', 'Gym', 'Playground', 'Library', 'Prayer hall', 'Off campus'];
+const TYPES = {
+  party: {
+    label: 'Class Party', blurb: 'Thursdays, during lunch & recess', color: '#B45309',
+    rules: { title: 'Party rules (Nov 6 staff meeting)', items: [
+      '<b>Thursdays only</b>, and approved before you tell students or families.',
+      '<b>Planned as a team</b>, not by one teacher alone.',
+      '<b>Starts and ends within lunch & recess.</b> It is not an all-day party.',
+      'Include the <b>learning activities</b> for the rest of the day: Reading Camp, Mystery Day or educational games.',
+    ]},
+    fields: [
+      { id: 'title', label: 'Party name', kind: 'text', ph: 'e.g. Reading Camp Party', hint: 'Optional. Leave blank to use “<class> Class Party”.' },
+      { id: 'date', label: 'Party date', kind: 'date', req: true, size: 'half', thursday: true },
+      { id: 'start', label: 'Starts', kind: 'time', req: true, size: 'quarter', window: true },
+      { id: 'end', label: 'Ends', kind: 'time', req: true, size: 'quarter', window: true },
+      { id: 'location', label: 'Location', kind: 'text', list: LOCATIONS, def: 'Classroom', size: 'half' },
+      { id: 'coPlanners', label: 'Co-planning teachers', kind: 'text', req: true, size: 'half', ph: 'e.g. Ms. Sara, Mr. Omar' },
+      { id: 'activities', label: 'Learning activities for the day', kind: 'chips', multi: true, req: true,
+        options: ['Reading Camp', 'Mystery Day', 'Educational games', 'Other'],
+        hint: 'Reading Camp: camp-themed day around books · Mystery Day: logic puzzles, hidden pictures, crosswords · Educational games: review current skills' },
+      { id: 'learningPlan', label: 'Plan for instructional time', kind: 'textarea', req: true, ph: 'What will students do before and after lunch & recess?' },
+      { id: 'food', label: 'Food, snacks & allergies', kind: 'textarea', ph: 'What will be served, who is bringing it, and how you will handle allergies.' },
+      { id: 'parentHelp', label: 'Parent help', kind: 'chips', options: ['No parent help needed', 'Parent volunteers needed'], hint: 'If you need parent volunteers, submit a Volunteer request for them too.' },
+      { id: 'confirm', label: 'Not shared until approved', kind: 'check', req: true, text: 'We won’t share this party with students or families until it’s approved.' },
+    ],
+    title: (v) => v.title || ((v.grade || 'Class') + ' Class Party'),
+  },
+  event: {
+    label: 'School Event', blurb: 'Assemblies, bees, trivia, spirit days', color: '#1D4ED8',
+    fields: [
+      { id: 'title', label: 'Event name', kind: 'text', req: true, ph: 'e.g. Classroom Spelling Bee' },
+      { id: 'date', label: 'Date', kind: 'date', req: true, size: 'half' },
+      { id: 'start', label: 'Starts', kind: 'time', req: true, size: 'quarter' },
+      { id: 'end', label: 'Ends', kind: 'time', req: true, size: 'quarter' },
+      { id: 'location', label: 'Location', kind: 'text', req: true, list: LOCATIONS, size: 'half' },
+      { id: 'grades', label: 'Grades / classes involved', kind: 'text', req: true, size: 'half', ph: 'e.g. 3rd–5th' },
+      { id: 'description', label: 'What’s happening?', kind: 'textarea', req: true, ph: 'Short description of the event and the schedule.' },
+      { id: 'attendance', label: 'Expected attendance', kind: 'number', size: 'half', ph: 'Students + adults' },
+      { id: 'budget', label: 'Estimated cost', kind: 'text', size: 'half', ph: 'e.g. $120 from class fund' },
+      { id: 'parents', label: 'Will parents attend?', kind: 'chips', options: ['No', 'Yes, on campus', 'Livestream only'] },
+      { id: 'needs', label: 'What do you need?', kind: 'chips', multi: true,
+        options: ['Tables & chairs', 'Mic / speakers', 'Projector', 'Livestream', 'Custodial help', 'Front desk support', 'Photos for social media'] },
+    ],
+    title: (v) => v.title,
+  },
+  fieldtrip: {
+    label: 'Field Trip', blurb: 'Off-campus learning', color: '#6D28D9',
+    fields: [
+      { id: 'destination', label: 'Destination', kind: 'text', req: true, size: 'half', ph: 'e.g. Houston Museum of Natural Science' },
+      { id: 'address', label: 'Address', kind: 'text', size: 'half' },
+      { id: 'date', label: 'Trip date', kind: 'date', req: true, size: 'half' },
+      { id: 'start', label: 'Leave school', kind: 'time', req: true, size: 'quarter' },
+      { id: 'end', label: 'Back at school', kind: 'time', req: true, size: 'quarter' },
+      { id: 'grades', label: 'Grades / classes', kind: 'text', req: true, size: 'half' },
+      { id: 'students', label: 'Number of students', kind: 'number', req: true, size: 'half' },
+      { id: 'chaperones', label: 'Chaperones', kind: 'text', req: true, ph: 'Names of staff and parent chaperones', hint: 'Parent chaperones also need a Volunteer request.' },
+      { id: 'transport', label: 'Transportation', kind: 'chips', req: true, options: ['School bus', 'Charter bus', 'Parent drivers', 'Walking'] },
+      { id: 'cost', label: 'Cost per student', kind: 'text', size: 'half', ph: 'e.g. $12' },
+      { id: 'permission', label: 'Permission slips', kind: 'chips', size: 'half', options: ['Ready', 'Need help making them'] },
+      { id: 'purpose', label: 'Learning purpose', kind: 'textarea', req: true, ph: 'How does this trip connect to what students are learning?' },
+    ],
+    title: (v) => 'Field Trip: ' + v.destination,
+    location: (v) => v.destination,
+  },
+  volunteer: {
+    label: 'Volunteer / Observer', blurb: 'Parents & student volunteers', color: '#0F766E',
+    rules: { title: 'Volunteer policy', items: [
+      'All volunteers and observers need the Principal’s approval <b>in advance</b>.',
+      'High school students and staff members’ students may not be on campus unless approved, and <b>may not have their phones</b> during school hours.',
+      'Once approved, the Front Desk, the Principal and Ms. Omayya are notified automatically.',
+      'Volunteers only get access to what they’re helping with.',
+    ]},
+    fields: [
+      { id: 'volunteerType', label: 'Who is coming?', kind: 'chips', req: true, options: ['Parent volunteer', 'Parent observer', 'High school student', 'Staff member’s student'] },
+      { id: 'volunteerNames', label: 'Name(s)', kind: 'text', req: true, size: 'half', ph: 'e.g. Sr. Amina Khan (Yusuf’s mom)' },
+      { id: 'volunteerContact', label: 'Phone or email', kind: 'text', size: 'half', hint: 'Optional, for the front desk.' },
+      { id: 'date', label: 'First day', kind: 'date', req: true, size: 'half' },
+      { id: 'endDate', label: 'Last day', kind: 'date', size: 'half', hint: 'Only if it’s more than one day.' },
+      { id: 'start', label: 'Arrives', kind: 'time', req: true, size: 'quarter' },
+      { id: 'end', label: 'Leaves', kind: 'time', req: true, size: 'quarter' },
+      { id: 'tasks', label: 'What will they help with or observe?', kind: 'textarea', req: true },
+      { id: 'areas', label: 'Areas they need access to', kind: 'chips', multi: true, req: true,
+        options: ['My classroom only', 'Cafeteria', 'Playground', 'Library', 'Gym', 'Front office'] },
+      { id: 'confirm', label: 'Access limits explained', kind: 'check', req: true,
+        text: 'I’ll let them know their access is limited to what they’re helping with (and student volunteers can’t have phones during school hours).' },
+    ],
+    title: (v) => (v.volunteerType || 'Volunteer') + ': ' + v.volunteerNames,
+    location: (v) => (v.areas || []).join(', '),
+  },
+};
+const CORE = ['title', 'date', 'endDate', 'start', 'end', 'location'];
+
+/* ------------------------------------------------------------------ *
+ *  State & helpers
+ * ------------------------------------------------------------------ */
+const state = { me: null, tab: 'new', type: '', editing: null, highlight: '' };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pill = (s) => '<span class="pill ' + s.split(' ')[0] + '">' + esc(s) + '</span>';
+const fmtTime = (t) => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + (h < 12 ? ' AM' : ' PM'); };
+const toYmd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const parseYmd = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3500); }
+function nextThursdays(n) {
+  const out = [], d = new Date(); d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + ((4 - d.getDay() + 7) % 7 || 7));
+  for (let i = 0; i < n; i++) { out.push(new Date(d)); d.setDate(d.getDate() + 7); }
+  return out;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Render
+ * ------------------------------------------------------------------ */
+function render() {
+  const me = state.me;
+  const open = me.requests.filter((r) => r.status === 'Pending' || r.status === 'Needs Changes').length;
+  $('app').innerHTML =
+    '<section class="hero"><h1>Assalamu alaikum' + (me.name ? ', ' + esc((/^(ms|mr|mrs|miss|dr|sr|br|sh|ustadh|ustadha|sister|brother)\.?$/i.test(me.name.split(' ')[0]) && me.name.split(' ')[1]) ? me.name.split(' ').slice(0, 2).join(' ') : me.name.split(' ')[0]) : '') + '</h1>' +
+    '<p>Class parties, school events, field trips and volunteers all need the Principal’s approval before you share them with students or families.</p></section>' +
+    '<div class="tabs" role="tablist"><button class="tab' + (state.tab === 'new' ? ' on' : '') + '" data-t="new">New request</button>' +
+    '<button class="tab' + (state.tab === 'mine' ? ' on' : '') + '" data-t="mine">My requests' + (open ? '<span class="n">' + open + '</span>' : '') + '</button></div>' +
+    '<div id="view"></div>';
+  document.querySelectorAll('.tab').forEach((b) => b.onclick = () => { state.tab = b.dataset.t; render(); });
+  state.tab === 'new' ? renderNew() : renderMine();
+}
+
+function renderNew() {
+  const v = $('view');
+  v.innerHTML =
+    (state.editing ? '<div class="editing"><span>Editing <b>' + esc(state.editing.title) + '</b>. Resubmitting sends it back to the Principal.</span><button class="btn btn-ghost" id="cancelEdit">Cancel</button></div>' : '') +
+    '<p class="step">1 · What do you need approved?</p>' +
+    '<div class="types">' + Object.keys(TYPES).map((k) =>
+      '<button class="choice' + (state.type === k ? ' on' : '') + '" data-k="' + k + '" style="--c:' + TYPES[k].color + '"' + (state.editing ? ' disabled' : '') + '>' +
+      '<div class="ico">' + ICONS[k] + '</div><b>' + TYPES[k].label + '</b><span>' + TYPES[k].blurb + '</span></button>').join('') + '</div>' +
+    '<div id="formArea"></div>';
+  document.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
+    state.type = b.dataset.k;
+    document.querySelectorAll('.choice').forEach((x) => x.classList.toggle('on', x === b));
+    renderForm();
+    setTimeout(() => $('formArea').scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+  });
+  if ($('cancelEdit')) $('cancelEdit').onclick = () => { state.editing = null; state.type = ''; state.tab = 'mine'; render(); };
+  if (state.type) renderForm();
+}
+
+function fieldHtml(f) {
+  const id = 'f_' + f.id;
+  const req = f.req ? '<span class="req">*</span>' : '';
+  let input = '';
+  if (f.kind === 'textarea') input = '<textarea id="' + id + '" placeholder="' + esc(f.ph || '') + '"></textarea>';
+  else if (f.kind === 'chips') input = '<div class="chips" id="' + id + '" data-multi="' + (f.multi ? 1 : 0) + '" role="group">' +
+    f.options.map((o) => '<span class="chip" tabindex="0" role="button" data-v="' + esc(o) + '">' + esc(o) + '</span>').join('') + '</div>';
+  else if (f.kind === 'check') return '<div class="field" data-f="' + f.id + '"><label class="checkline"><input type="checkbox" id="' + id + '"><span>' + esc(f.text) + req + '</span></label><div class="err" hidden></div></div>';
+  else {
+    const type = { text: 'text', date: 'date', time: 'time', number: 'number' }[f.kind];
+    input = '<input type="' + type + '" id="' + id + '" placeholder="' + esc(f.ph || '') + '"' + (f.list ? ' list="' + id + '_l"' : '') + (f.kind === 'number' ? ' min="0"' : '') + '>' +
+      (f.list ? '<datalist id="' + id + '_l">' + f.list.map((o) => '<option value="' + esc(o) + '">').join('') + '</datalist>' : '');
+  }
+  let extra = '';
+  if (f.thursday) extra = '<div class="quick"><span class="small muted">Next Thursdays:</span>' +
+    nextThursdays(4).map((d) => '<button type="button" data-ymd="' + toYmd(d) + '">' + d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + '</button>').join('') + '</div>';
+  const hint = f.hint || (f.thursday ? 'Class parties are on Thursdays only.' : '');
+  return '<div class="field ' + (f.size || '') + '" data-f="' + f.id + '"><label class="lbl" for="' + id + '">' + esc(f.label) + req + '</label>' + input + extra +
+    (hint ? '<div class="hint">' + esc(hint) + '</div>' : '') + '<div class="err" hidden></div></div>';
+}
+
+function renderForm() {
+  const T = TYPES[state.type];
+  const win = state.me.partyWindow;
+  $('formArea').innerHTML =
+    '<p class="step">2 · Details</p>' +
+    '<div class="card formcard" style="border-top:4px solid ' + T.color + '"><h2>' + T.label + ' request</h2>' +
+    '<div class="muted small">Fields marked <span style="color:var(--warn)">*</span> are required.</div>' +
+    (T.rules ? '<div class="rules"><b class="t">' + esc(T.rules.title) + '</b><ul>' + T.rules.items.map((i) => '<li>' + i + '</li>').join('') + '</ul></div>' : '') +
+    '<div class="grid">' +
+      fieldHtml({ id: 'name', label: 'Your name', kind: 'text', req: true, size: 'half' }) +
+      fieldHtml({ id: 'grade', label: 'Class / grade', kind: 'text', req: true, size: 'half', ph: 'e.g. 3rd Grade – Ms. Sara' }) +
+      '<div class="divider"></div>' +
+      T.fields.map(fieldHtml).join('') +
+      fieldHtml({ id: 'notes', label: 'Anything else the Principal should know?', kind: 'textarea' }) +
+    '</div>' +
+    (state.type === 'party' && win.start ? '<p class="hint" style="margin-top:14px">Lunch &amp; recess runs ' + fmtTime(win.start) + ' – ' + fmtTime(win.end) + '.</p>' : '') +
+    '<div class="actions"><span class="small muted">You’ll get an email as soon as it’s reviewed.</span>' +
+    '<button class="btn btn-primary" id="submit">' + (state.editing ? 'Resubmit for approval' : 'Send for approval') + '</button></div></div>';
+
+  // Defaults
+  $('f_name').value = state.me.name || '';
+  $('f_grade').value = state.me.grade || '';
+  T.fields.forEach((f) => { if (f.def && $('f_' + f.id)) $('f_' + f.id).value = f.def; });
+  if (state.type === 'party' && win.start) { $('f_start').value = win.start; $('f_end').value = win.end; }
+  if (state.editing) fill(state.editing);
+
+  // Behaviour
+  document.querySelectorAll('.chips').forEach((g) => g.querySelectorAll('.chip').forEach((c) => {
+    const toggle = () => {
+      if (g.dataset.multi !== '1') g.querySelectorAll('.chip').forEach((x) => x !== c && x.classList.remove('on'));
+      c.classList.toggle('on'); clearErr(g.closest('.field'));
+    };
+    c.onclick = toggle;
+    c.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } };
+  }));
+  document.querySelectorAll('.quick button').forEach((b) => b.onclick = () => { $('f_date').value = b.dataset.ymd; clearErr(b.closest('.field')); });
+  document.querySelectorAll('#formArea input, #formArea textarea').forEach((el) => el.addEventListener('input', () => clearErr(el.closest('.field'))));
+  if ($('f_date') && state.type === 'party') $('f_date').addEventListener('change', () => {
+    const v = $('f_date').value;
+    if (v && parseYmd(v).getDay() !== 4) setErr('date', 'That’s a ' + parseYmd(v).toLocaleDateString([], { weekday: 'long' }) + '. Class parties are on Thursdays only.');
+  });
+  $('submit').onclick = submit;
+}
+
+function fill(r) {
+  $('f_name').value = r.name; $('f_grade').value = r.grade;
+  CORE.forEach((k) => { if ($('f_' + k) && r[k]) $('f_' + k).value = r[k]; });
+  (r.answers || []).forEach((a) => {
+    const el = $('f_' + a.key); if (!el) return;
+    if (el.classList.contains('chips')) {
+      const vals = [].concat(a.value);
+      el.querySelectorAll('.chip').forEach((c) => c.classList.toggle('on', vals.indexOf(c.dataset.v) > -1));
+    } else if (el.type === 'checkbox') el.checked = !!a.value;
+    else el.value = a.value;
+  });
+}
+
+function readVal(f) {
+  const el = $('f_' + f.id);
+  if (f.kind === 'chips') {
+    const on = [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.v);
+    return f.multi ? on : (on[0] || '');
+  }
+  if (f.kind === 'check') return el.checked ? 'Confirmed' : '';
+  return el.value.trim();
+}
+
+function setErr(id, msg) {
+  const f = document.querySelector('.field[data-f="' + id + '"]'); if (!f) return;
+  f.classList.add('invalid'); const e = f.querySelector('.err'); e.textContent = msg; e.hidden = false;
+}
+function clearErr(f) { if (!f) return; f.classList.remove('invalid'); const e = f.querySelector('.err'); if (e) e.hidden = true; }
+
+function submit() {
+  const T = TYPES[state.type];
+  const all = [{ id: 'name', req: true, kind: 'text' }, { id: 'grade', req: true, kind: 'text' }].concat(T.fields, [{ id: 'notes', kind: 'textarea', label: 'Notes' }]);
+  const v = {};
+  document.querySelectorAll('.field.invalid').forEach(clearErr);
+  let bad = [];
+  all.forEach((f) => {
+    v[f.id] = readVal(f);
+    const empty = Array.isArray(v[f.id]) ? !v[f.id].length : !v[f.id];
+    if (f.req && empty) bad.push([f.id, f.kind === 'check' ? 'Please confirm.' : f.kind === 'chips' ? 'Please choose an option.' : 'Required.']);
+  });
+
+  const win = state.me.partyWindow;
+  if (v.date && state.type === 'party' && parseYmd(v.date).getDay() !== 4) bad.push(['date', 'That’s a ' + parseYmd(v.date).toLocaleDateString([], { weekday: 'long' }) + '. Please pick a Thursday.']);
+  if (state.type === 'party' && win.start && v.start && v.end && (v.start < win.start || v.end > win.end))
+    bad.push(['end', 'Parties must stay within lunch & recess (' + fmtTime(win.start) + '–' + fmtTime(win.end) + ').']);
+  if (v.start && v.end && !v.endDate && v.end <= v.start) bad.push(['end', 'Must be after the start time.']);
+  if (v.endDate && v.date && v.endDate < v.date) bad.push(['endDate', 'Can’t be before the first day.']);
+  if (v.date && parseYmd(v.date) < new Date(new Date().toDateString())) bad.push(['date', 'This date has already passed.']);
+
+  if (bad.length) {
+    bad.forEach(([id, m]) => setErr(id, m));
+    document.querySelector('.field.invalid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('Please fix the highlighted fields.');
+    return;
+  }
+
+  const payload = {
+    id: state.editing ? state.editing.id : '',
+    type: state.type, name: v.name, grade: v.grade,
+    title: T.title(v),
+    date: v.date || '', endDate: v.endDate || '', start: v.start || '', end: v.end || '',
+    location: T.location ? T.location(v) : (v.location || ''),
+    answers: T.fields.concat([{ id: 'notes', label: 'Notes' }])
+      .filter((f) => CORE.indexOf(f.id) < 0)
+      .map((f) => ({ key: f.id, label: f.label, value: v[f.id] }))
+      .filter((a) => Array.isArray(a.value) ? a.value.length : a.value),
+  };
+
+  const btn = $('submit'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Sending…';
+  google.script.run.withSuccessHandler((r) => {
+    const i = state.me.requests.findIndex((x) => x.id === r.id);
+    if (i > -1) state.me.requests[i] = r; else state.me.requests.unshift(r);
+    state.me.name = r.name; state.me.grade = r.grade;
+    const wasEdit = !!state.editing;
+    state.editing = null; state.type = '';
+    $('view').innerHTML = '<div class="card done"><div class="big">' + ICONS.check + '</div><h2>' + (wasEdit ? 'Resubmitted!' : 'Sent for approval!') + '</h2>' +
+      '<p class="muted">' + esc(r.title) + ' · ' + esc(r.dateLabel) + '<br>Request ID <span class="id">' + esc(r.id) + '</span></p>' +
+      '<p class="muted small">We emailed you a copy. You’ll get another email when the Principal reviews it.</p>' +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px"><button class="btn btn-ghost" id="another">Submit another</button><button class="btn btn-primary" id="seeMine">View my requests</button></div></div>';
+    $('another').onclick = () => { state.tab = 'new'; render(); };
+    $('seeMine').onclick = () => { state.tab = 'mine'; state.highlight = r.id; render(); };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }).withFailureHandler((e) => {
+    btn.disabled = false; btn.textContent = state.editing ? 'Resubmit for approval' : 'Send for approval';
+    toast(e.message);
+  }).submitRequest(payload);
+}
+
+function renderMine() {
+  const list = state.me.requests;
+  if (!list.length) {
+    $('view').innerHTML = '<div class="card empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><div><b>No requests yet</b></div><div class="small">Your submitted requests and their status will show up here.</div></div>';
+    return;
+  }
+  $('view').innerHTML = '<div class="mine">' + list.map((r) => {
+    const canEdit = r.status === 'Pending' || r.status === 'Needs Changes';
+    return '<div class="card reqcard' + (state.highlight === r.id ? ' hl' : '') + '" id="r_' + esc(r.id) + '" style="--c:' + r.typeColor + '">' +
+      '<div class="top"><div><span class="tag" style="color:' + r.typeColor + '"><i style="background:' + r.typeColor + '"></i>' + esc(r.typeLabel) + '</span>' +
+      '<h3>' + esc(r.title) + '</h3><div class="small muted">' + esc(r.dateLabel) + (r.timeLabel ? ' · ' + esc(r.timeLabel) : '') + (r.location ? ' · ' + esc(r.location) : '') + '</div></div>' + pill(r.status) + '</div>' +
+      (r.note ? '<div class="note"><b>Note from ' + esc(r.decidedBy || 'the Principal') + '</b>' + esc(r.note) + '</div>' : '') +
+      '<div class="foot"><span class="small muted">' + esc(r.id) + ' · submitted ' + esc(r.submittedLabel) + (r.decidedLabel ? ' · reviewed ' + esc(r.decidedLabel) : '') + '</span>' +
+      (canEdit ? '<button class="btn ' + (r.status === 'Needs Changes' ? 'btn-primary' : 'btn-ghost') + '" data-edit="' + esc(r.id) + '">' + (r.status === 'Needs Changes' ? 'Edit & resubmit' : 'Edit') + '</button>' : '') +
+      '</div></div>';
+  }).join('') + '</div>';
+  document.querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => {
+    const r = list.find((x) => x.id === b.dataset.edit);
+    state.editing = r; state.type = r.type; state.tab = 'new'; render();
+    setTimeout(() => $('formArea').scrollIntoView({ behavior: 'smooth' }), 50);
+  });
+  if (state.highlight && $('r_' + state.highlight)) setTimeout(() => $('r_' + state.highlight).scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+}
+
+/* ------------------------------------------------------------------ *
+ *  Boot
+ * ------------------------------------------------------------------ */
+google.script.url.getLocation((loc) => {
+  const p = loc.parameter || {};
+  if (p.page === 'mine') { state.tab = 'mine'; state.highlight = p.id || ''; }
+  google.script.run.withSuccessHandler((me) => {
+    state.me = me;
+    $('who').innerHTML = (me.testMode ? '<span class="trial">Trial mode</span> ' : '') + '<span>' + esc(me.email) + '</span>' + (me.isApprover ? '<br><a href="' + esc(me.dashboardUrl) + '">Principal dashboard →</a>' : '');
+    render();
+  }).withFailureHandler((e) => {
+    $('app').innerHTML = '<div class="card empty"><b>Couldn’t load.</b><div class="small">' + esc(e.message) + '</div></div>';
+  }).getTeacherData();
+});
+</script>
+</body>
+</html>
